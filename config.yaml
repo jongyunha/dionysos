@@ -1,0 +1,6 @@
+docker:
+  image: "hello-world"
+  tag: "latest"
+  interval: 5          # Interval for execution
+  interval_unit: "s"    # Time unit for interval ("s" for seconds, "m" for minutes, "h" for hours)
+  concurrent: false
