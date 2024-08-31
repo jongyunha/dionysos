@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	"os"
 )
 
 // Config structure for the YAML file
@@ -14,12 +14,14 @@ type Config struct {
 		Interval     int    `yaml:"interval"`
 		IntervalUnit string `yaml:"interval_unit"`
 		Concurrent   bool   `yaml:"concurrent"`
+		Timeout      int    `yaml:"timeout"`
+		TimeoutUnit  string `yaml:"timeout_unit"`
 	} `yaml:"docker"`
 }
 
 // LoadConfig reads the YAML configuration file and returns a Config struct
 func LoadConfig(filePath string) (*Config, error) {
-	configFile, err := ioutil.ReadFile(filePath)
+	configFile, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("error reading YAML file: %v", err)
 	}
