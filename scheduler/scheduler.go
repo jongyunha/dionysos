@@ -44,21 +44,17 @@ func ScheduleTask(dockerClient *docker.Client, config *config.Config) {
 
 	var wg sync.WaitGroup
 
-	for {
-		select {
-		case <-ticker.C:
-			// Calculate the deadline
-			deadline := time.Now().Add(timeoutDuration)
+	for range ticker.C {
+		deadline := time.Now().Add(timeoutDuration)
 
-			if config.Docker.Concurrent {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					executeWithDeadline(dockerClient, config, deadline)
-				}()
-			} else {
+		if config.Docker.Concurrent {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
 				executeWithDeadline(dockerClient, config, deadline)
-			}
+			}()
+		} else {
+			executeWithDeadline(dockerClient, config, deadline)
 		}
 	}
 }
