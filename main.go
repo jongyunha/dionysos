@@ -23,5 +23,5 @@ func main() {
 	}
 
 	// Schedule the Docker task using the configuration
-	scheduler.ScheduleTask(dockerClient, cfg.Docker.Image, cfg.Docker.Tag, cfg.Docker.Interval, cfg.Docker.IntervalUnit, cfg.Docker.Concurrent)
+	scheduler.ScheduleTask(dockerClient, cfg)
 }

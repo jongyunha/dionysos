@@ -10,21 +10,21 @@ import (
 	"os"
 )
 
-// DockerClient wraps the Docker API client
-type DockerClient struct {
+// Client wraps the Docker API client
+type Client struct {
 	cli *client.Client
 }
 
 // NewDockerClient initializes a new Docker client
-func NewDockerClient() (*DockerClient, error) {
+func NewDockerClient() (*Client, error) {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, fmt.Errorf("error creating Docker client: %v", err)
 	}
-	return &DockerClient{cli: cli}, nil
+	return &Client{cli: cli}, nil
 }
 
-func (d *DockerClient) ExecuteDocker(ctx context.Context, dockerImage string, tag string) error {
+func (d *Client) ExecuteDocker(ctx context.Context, dockerImage string, tag string) error {
 	// Pull the Docker image if not available locally
 	out, err := d.cli.ImagePull(ctx, fmt.Sprintf("%s:%s", dockerImage, tag), image.PullOptions{})
 	if err != nil {
@@ -57,6 +57,12 @@ func (d *DockerClient) ExecuteDocker(ctx context.Context, dockerImage string, ta
 			return fmt.Errorf("error waiting for Docker container: %v", err)
 		}
 	case <-statusCh:
+	case <-ctx.Done():
+		fmt.Println("Timeout reached. Stopping Docker container...")
+		// Stop the container if the context is cancelled
+		if stopErr := d.cli.ContainerStop(context.Background(), resp.ID, container.StopOptions{}); stopErr != nil {
+			return fmt.Errorf("error stopping Docker container: %v", stopErr)
+		}
 	}
 
 	logs, err := d.cli.ContainerLogs(ctx, resp.ID, container.LogsOptions{ShowStdout: true})
